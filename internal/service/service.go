@@ -1,0 +1,97 @@
+package service
+
+import (
+	"context"
+	"errors"
+	"services-catalog/internal/repo"
+	"time"
+
+	"github.com/google/uuid"
+)
+
+type Svc struct{ repo *repo.Repo }
+
+func New(repo *repo.Repo) *Svc { return &Svc{repo: repo} }
+
+type ListOpts = repo.ListOpts
+
+type ServiceDTO struct {
+	ServiceUUID       uuid.UUID `json:"service_uuid"`
+	Name              string    `json:"name"`
+	Description       string    `json:"description"`
+	LatestPublishedOn *string   `json:"latest_published_on,omitempty"`
+	VersionCount      int64     `json:"version_count"`
+}
+
+func (s *Svc) List(ctx context.Context, o ListOpts) ([]ServiceDTO, int64, error) {
+	items, total, err := s.repo.ListServices(ctx, o)
+	if err != nil {
+		return nil, 0, err
+	}
+	out := make([]ServiceDTO, 0, len(items))
+	for _, it := range items {
+		var latest *string
+		if it.LatestPublishedOn != nil {
+			v := it.LatestPublishedOn.Format("2006-01-02")
+			latest = &v
+		}
+		out = append(out, ServiceDTO{
+			ServiceUUID:       it.ServiceUUID,
+			Name:              it.Name,
+			Description:       it.Description,
+			LatestPublishedOn: latest,
+			VersionCount:      it.VersionCount,
+		})
+	}
+	return out, total, nil
+}
+
+func (s *Svc) Get(ctx context.Context, id uuid.UUID) (*ServiceDTO, error) {
+	it, err := s.repo.GetService(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return &ServiceDTO{
+		ServiceUUID: it.ServiceUUID,
+		Name:        it.Name,
+		Description: it.Description,
+	}, nil
+}
+
+type VersionDTO struct {
+	ID          uuid.UUID `json:"id"`
+	Name        string    `json:"name"`
+	PublishedOn string    `json:"published_on"`
+}
+
+func (s *Svc) Versions(ctx context.Context, id uuid.UUID) ([]VersionDTO, error) {
+	vs, err := s.repo.ListVersions(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	out := make([]VersionDTO, 0, len(vs))
+	for _, v := range vs {
+		out = append(out, VersionDTO{
+			ID:          v.ID,
+			Name:        v.Name,
+			PublishedOn: v.PublishedOn.Format("2006-01-02"),
+		})
+	}
+	return out, nil
+}
+
+func ParseUUID(s string) (uuid.UUID, error) {
+	id, err := uuid.Parse(s)
+	if err != nil {
+		return uuid.Nil, errors.New("invalid uuid")
+	}
+	return id, nil
+}
+
+// Utility mainly for tests
+func Ptr[T any](v T) *T { return &v }
+
+// (Optionally) a small helper to normalize date to midnight for input paths later
+func normalizeDate(t time.Time) time.Time {
+	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
+}
