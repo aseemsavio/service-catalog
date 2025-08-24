@@ -16,11 +16,10 @@ func New(repo *repo.Repo) *Svc { return &Svc{repo: repo} }
 type ListOpts = repo.ListOpts
 
 type ServiceDTO struct {
-	ServiceUUID       uuid.UUID `json:"service_uuid"`
-	Name              string    `json:"name"`
-	Description       string    `json:"description"`
-	LatestPublishedOn *string   `json:"latest_published_on,omitempty"`
-	VersionCount      int64     `json:"version_count"`
+	ServiceUUID uuid.UUID    `json:"service_uuid"`
+	Name        string       `json:"name"`
+	Description string       `json:"description"`
+	Versions    []VersionDTO `json:"versions"`
 }
 
 func (s *Svc) List(ctx context.Context, o ListOpts) ([]ServiceDTO, int64, error) {
@@ -30,17 +29,19 @@ func (s *Svc) List(ctx context.Context, o ListOpts) ([]ServiceDTO, int64, error)
 	}
 	out := make([]ServiceDTO, 0, len(items))
 	for _, it := range items {
-		var latest *string
-		if it.LatestPublishedOn != nil {
-			v := it.LatestPublishedOn.Format("2006-01-02")
-			latest = &v
+		versions := make([]VersionDTO, 0, len(it.Versions))
+		for _, v := range it.Versions {
+			versions = append(versions, VersionDTO{
+				ID:          v.ID,
+				Name:        v.Name,
+				PublishedOn: v.PublishedOn.Format("2006-01-02"),
+			})
 		}
 		out = append(out, ServiceDTO{
-			ServiceUUID:       it.ServiceUUID,
-			Name:              it.Name,
-			Description:       it.Description,
-			LatestPublishedOn: latest,
-			VersionCount:      it.VersionCount,
+			ServiceUUID: it.ServiceUUID,
+			Name:        it.Name,
+			Description: it.Description,
+			Versions:    versions,
 		})
 	}
 	return out, total, nil

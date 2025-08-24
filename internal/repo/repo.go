@@ -17,9 +17,6 @@ type Service struct {
 	CreatedAt   time.Time `gorm:"not null;default:now()"`
 	UpdatedAt   time.Time `gorm:"not null;default:now()"`
 	Versions    []Version `gorm:"foreignKey:ServiceUUID;constraint:OnDelete:CASCADE"`
-	// Read-side aggregates
-	LatestPublishedOn *time.Time `gorm:"-"`
-	VersionCount      int64      `gorm:"-"`
 }
 
 type Version struct {
@@ -74,26 +71,18 @@ func (r *Repo) ListServices(ctx context.Context, o ListOpts) (items []Service, t
 		return
 	}
 
-	// Select aggregates and sort
-	raw := r.db.WithContext(ctx).Model(&Service{}).
-		Select(`services.*,
-      (SELECT MAX(published_on) FROM versions v WHERE v.service_uuid = services.service_uuid) AS latest_published_on,
-      (SELECT COUNT(1) FROM versions v2 WHERE v2.service_uuid = services.service_uuid) AS version_count`)
-
+	// Query services and preload versions
+	raw := r.db.WithContext(ctx).Model(&Service{}).Preload("Versions")
 	if o.Query != "" {
 		like := "%" + o.Query + "%"
-		raw = raw.Where("services.name ILIKE ? OR services.description ILIKE ?", like, like)
+		raw = raw.Where("name ILIKE ? OR description ILIKE ?", like, like)
 	}
 
 	switch o.SortBy {
 	case "name", "created_at", "updated_at":
-		raw = raw.Order("services." + o.SortBy + " " + orderOr(o.Order))
-	case "latest_published_on":
-		raw = raw.Order("latest_published_on " + orderOr(o.Order))
-	case "version_count":
-		raw = raw.Order("version_count " + orderOr(o.Order))
+		raw = raw.Order(o.SortBy + " " + orderOr(o.Order))
 	default:
-		raw = raw.Order("services.name asc")
+		raw = raw.Order("name asc")
 	}
 
 	err = raw.Offset((o.Page - 1) * o.PageSize).Limit(o.PageSize).Find(&items).Error

@@ -9,13 +9,12 @@ import (
 )
 
 type Service struct {
-	ServiceUUID       uuid.UUID
-	Name              string
-	Description       string
-	CreatedAt         time.Time
-	UpdatedAt         time.Time
-	LatestPublishedOn *time.Time
-	VersionCount      int64
+	ServiceUUID uuid.UUID
+	Name        string
+	Description string
+	CreatedAt   time.Time
+	UpdatedAt   time.Time
+	Versions    []Version
 }
 
 type Version struct {
