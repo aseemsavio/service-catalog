@@ -12,7 +12,6 @@ import (
 	"gorm.io/gorm"
 )
 
-// PostgresContainer holds container details and connection information
 type PostgresContainer struct {
 	Container testcontainers.Container
 	DSN       string

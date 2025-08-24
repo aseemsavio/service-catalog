@@ -29,7 +29,7 @@ func (h *Handler) ListServices(w http.ResponseWriter, r *http.Request) {
 	}
 	resp := ListResponse[service.ServiceDTO]{Data: items}
 	resp.Meta.Page = opts.Page
-	resp.Meta.PageSize = opts.PageSize
+	resp.Meta.PageSize = len(items)
 	resp.Meta.Total = total
 	writeJSON(w, http.StatusOK, resp)
 }
