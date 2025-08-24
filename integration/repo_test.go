@@ -1,4 +1,4 @@
-package service_catalog_test
+package integration_test
 
 import (
 	"context"

@@ -6,24 +6,17 @@ run:
 build:
 	go build -o bin/$(APP) ./cmd/api
 
-test:
-	go test ./...
+integration-test:
+	go test ./integration -v
 
-lint:
-	@echo "Add golangci-lint if desired"
+tidy:
+	go mod tidy
 
 up:
-	docker-compose up -d --build
+	docker compose up -d
 
 down:
-	docker-compose down -v
-
-logs:
-	docker-compose logs -f api
+	docker compose down -v
 
 psql:
 	docker-compose exec postgres psql -U $$PG_USER -d $$PG_DB
-
-migrate-up:
-	@echo "Apply migrations with psql"
-	docker-compose exec -T postgres bash -lc 'for f in /migrations/*.sql; do psql -U $$POSTGRES_USER -d $$POSTGRES_DB -f $$f; done'
