@@ -15,33 +15,33 @@ import (
 )
 
 func main() {
-	cfg := config.Load()
-	logr, err := logger.New(cfg.LogLevel)
+	configuration := config.Load()
+	logg, err := logger.New(configuration.LogLevel)
 	if err != nil {
 		log.Fatalf("logger: %v", err)
 	}
-	defer logr.Sync()
+	defer logg.Sync()
 
-	rep, err := repo.Open(cfg.PGDSN())
+	rep, err := repo.Open(configuration.PostgresConnectionString())
 	if err != nil {
-		logr.Fatal("DB open failed", zap.Error(err))
+		logg.Fatal("DB open failed", zap.Error(err))
 	}
 
-	err = migrations.RunMigrations(cfg)
+	err = migrations.RunMigrations(configuration)
 	if err != nil {
-		logr.Fatal("Migrations failed", zap.Error(err))
+		logg.Fatal("DB Migrations failed", zap.Error(err))
 	} else {
-		logr.Info("Migrations ran successfully")
+		logg.Info("DB Migrations ran successfully")
 	}
 
 	svc := service.New(rep)
 	h := httpx.NewHandler(svc)
 	r := httpx.NewRouter(h)
 
-	addr := ":" + cfg.HTTPPort
-	logr.Info("starting http server", zap.String("addr", addr))
+	addr := ":" + configuration.HTTPPort
+	logg.Info("starting http server", zap.String("addr", addr))
 	srv := &http.Server{Addr: addr, Handler: r}
 	if err := srv.ListenAndServe(); err != nil {
-		logr.Fatal("server stopped", zap.Error(err))
+		logg.Fatal("server stopped", zap.Error(err))
 	}
 }

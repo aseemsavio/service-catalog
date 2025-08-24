@@ -37,7 +37,7 @@ func Load() Config {
 	}
 }
 
-func (c Config) PGDSN() string {
+func (c Config) PostgresConnectionString() string {
 	return fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
 		c.PG.Host, c.PG.Port, c.PG.User, c.PG.Password, c.PG.DB, c.PG.SSLMode,

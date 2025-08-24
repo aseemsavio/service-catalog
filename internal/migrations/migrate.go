@@ -2,6 +2,7 @@ package migrations
 
 import (
 	"database/sql"
+	"errors"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -14,7 +15,7 @@ import (
 )
 
 func RunMigrations(cfg config.Config) error {
-	db, err := sql.Open("postgres", cfg.PGDSN())
+	db, err := sql.Open("postgres", cfg.PostgresConnectionString())
 	if err != nil {
 		return fmt.Errorf("failed to open db: %w", err)
 	}
@@ -41,7 +42,7 @@ func RunMigrations(cfg config.Config) error {
 	}
 
 	err = m.Up()
-	if err != nil && err != migrate.ErrNoChange {
+	if err != nil && !errors.Is(err, migrate.ErrNoChange) {
 		return fmt.Errorf("migration failed: %w", err)
 	}
 	return nil
