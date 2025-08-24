@@ -1,4 +1,3 @@
--- +goose Up
 CREATE
 EXTENSION IF NOT EXISTS "uuid-ossp";
 
@@ -52,6 +51,3 @@ CREATE TABLE IF NOT EXISTS versions
 CREATE INDEX IF NOT EXISTS idx_services_name ON services (name);
 CREATE INDEX IF NOT EXISTS idx_versions_service_published ON versions (service_uuid, published_on DESC);
 
--- +goose Down
-DROP TABLE IF EXISTS versions;
-DROP TABLE IF EXISTS services;

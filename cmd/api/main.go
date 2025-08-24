@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"services-catalog/internal/config"
 	"services-catalog/internal/logger"
+	"services-catalog/internal/migrations"
 	"services-catalog/internal/repo"
 	"services-catalog/internal/service"
 
@@ -23,7 +24,14 @@ func main() {
 
 	rep, err := repo.Open(cfg.PGDSN())
 	if err != nil {
-		logr.Fatal("db open failed", zap.Error(err))
+		logr.Fatal("DB open failed", zap.Error(err))
+	}
+
+	err = migrations.RunMigrations(cfg)
+	if err != nil {
+		logr.Fatal("Migrations failed", zap.Error(err))
+	} else {
+		logr.Info("Migrations ran successfully")
 	}
 
 	svc := service.New(rep)
