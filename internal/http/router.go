@@ -12,7 +12,7 @@ func NewRouter(h *Handler) http.Handler {
 		r.Use(mw)
 	}
 
-	r.Get("/v1/healthz", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200); _, _ = w.Write([]byte("ok")) })
+	r.Get("/v1/health", func(w http.ResponseWriter, r *http.Request) { w.WriteHeader(200); _, _ = w.Write([]byte("ok")) })
 
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/services", h.ListServices)
