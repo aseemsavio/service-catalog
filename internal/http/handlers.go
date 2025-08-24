@@ -1,0 +1,74 @@
+package http
+
+import (
+	"encoding/json"
+	"net/http"
+	"services-catalog/internal/service"
+	"strconv"
+
+	"github.com/go-chi/chi/v5"
+)
+
+// Handler handles HTTP requests for services
+type Handler struct{ svc *service.Svc }
+
+// NewHandler creates a new Handler with the given service
+func NewHandler(s *service.Svc) *Handler { return &Handler{svc: s} }
+
+// ListServices represents a paginated list response
+func (h *Handler) ListServices(w http.ResponseWriter, r *http.Request) {
+	q := r.URL.Query()
+	opts := service.ListOpts{
+		Query:    q.Get("query"),
+		SortBy:   q.Get("sort"),
+		Order:    q.Get("order"),
+		Page:     atoiOr(q.Get("page"), 1),
+		PageSize: atoiOr(q.Get("page_size"), 20),
+	}
+	items, total, err := h.svc.List(r.Context(), opts)
+	if err != nil {
+		writeErr(w, http.StatusInternalServerError, err.Error())
+		return
+	}
+	resp := ListResponse[service.ServiceDTO]{Data: items}
+	resp.Meta.Page = opts.Page
+	resp.Meta.PageSize = len(items)
+	resp.Meta.Total = total
+	writeJSON(w, http.StatusOK, resp)
+}
+
+// GetService retrieves a service by its UUID
+func (h *Handler) GetService(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := service.ParseUUID(idStr)
+	if err != nil {
+		writeErr(w, http.StatusBadRequest, err.Error())
+		return
+	}
+	it, err := h.svc.Get(r.Context(), id)
+	if err != nil {
+		writeErr(w, http.StatusNotFound, "service not found")
+		return
+	}
+	writeJSON(w, http.StatusOK, it)
+}
+
+// writeJSON writes the given value as a JSON response with the specified status code
+func writeJSON(w http.ResponseWriter, code int, v any) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(code)
+	_ = json.NewEncoder(w).Encode(v)
+}
+
+// writeErr writes an error message as a JSON response with the specified status code
+func writeErr(w http.ResponseWriter, code int, msg string) {
+	writeJSON(w, code, map[string]string{"error": msg})
+}
+
+// atoiOr converts a string to an integer, returning a default value if conversion fails or the value is not positive
+func atoiOr(s string, d int) int {
+	if v, err := strconv.Atoi(s); err == nil && v > 0 {
+		return v
+	}
+	return d
+}
