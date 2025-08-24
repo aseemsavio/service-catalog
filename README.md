@@ -88,7 +88,32 @@ The API supports pagination with the following query parameters:
 
 Example: `/services?page=2&page_size=10&query=auth&sort=name&order=asc`
 
----
+## Basic Usage
+
+### Get all services
+
+```bash
+curl --location 'http://localhost:8080/v1/services'
+```
+
+### Get all services (requesting for next pages)
+
+```bash
+curl --location 'http://localhost:8080/v1/services?page=2&page_size=5'
+```
+
+### Get a service by ID
+
+```bash
+curl --location 'http://localhost:8080/v1/services/{id}'
+```
+
+### Get a service by Custom query
+
+```bash
+curl --location 'http://localhost:8080/v1/services?query=email'
+```
+
 
 # How to Set up and Run this Project
 
