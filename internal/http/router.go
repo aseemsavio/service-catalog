@@ -17,7 +17,6 @@ func NewRouter(h *Handler) http.Handler {
 	r.Route("/v1", func(r chi.Router) {
 		r.Get("/services", h.ListServices)
 		r.Get("/services/{id}", h.GetService)
-		r.Get("/services/{id}/versions", h.ListVersions)
 	})
 
 	return r

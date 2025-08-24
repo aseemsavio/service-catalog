@@ -74,22 +74,6 @@ type VersionDTO struct {
 	PublishedOn string    `json:"published_on"`
 }
 
-func (s *Svc) Versions(ctx context.Context, id uuid.UUID) ([]VersionDTO, error) {
-	vs, err := s.repo.ListVersions(ctx, id)
-	if err != nil {
-		return nil, err
-	}
-	out := make([]VersionDTO, 0, len(vs))
-	for _, v := range vs {
-		out = append(out, VersionDTO{
-			ID:          v.ID,
-			Name:        v.Name,
-			PublishedOn: v.PublishedOn.Format("2006-01-02"),
-		})
-	}
-	return out, nil
-}
-
 func ParseUUID(s string) (uuid.UUID, error) {
 	id, err := uuid.Parse(s)
 	if err != nil {

@@ -98,14 +98,3 @@ func (r *Repo) GetService(ctx context.Context, id uuid.UUID) (*Service, error) {
 	}
 	return &s, nil
 }
-
-func (r *Repo) ListVersions(ctx context.Context, serviceID uuid.UUID) ([]Version, error) {
-	var vs []Version
-	if err := r.db.WithContext(ctx).
-		Where("service_uuid = ?", serviceID).
-		Order("published_on DESC, name DESC").
-		Find(&vs).Error; err != nil {
-		return nil, err
-	}
-	return vs, nil
-}

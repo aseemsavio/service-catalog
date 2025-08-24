@@ -49,21 +49,6 @@ func (h *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, it)
 }
 
-func (h *Handler) ListVersions(w http.ResponseWriter, r *http.Request) {
-	idStr := chi.URLParam(r, "id")
-	id, err := service.ParseUUID(idStr)
-	if err != nil {
-		writeErr(w, http.StatusBadRequest, err.Error())
-		return
-	}
-	items, err := h.svc.Versions(r.Context(), id)
-	if err != nil {
-		writeErr(w, http.StatusInternalServerError, err.Error())
-		return
-	}
-	writeJSON(w, http.StatusOK, map[string]any{"data": items})
-}
-
 func writeJSON(w http.ResponseWriter, code int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
