@@ -47,15 +47,24 @@ func (s *Svc) List(ctx context.Context, o ListOpts) ([]ServiceDTO, int64, error)
 	return out, total, nil
 }
 
-func (s *Svc) Get(ctx context.Context, id uuid.UUID) (*ServiceDTO, error) {
+func (s *Svc) Get(ctx context.Context, id uuid.UUID) (ServiceDTO, error) {
 	it, err := s.repo.GetService(ctx, id)
 	if err != nil {
-		return nil, err
+		return ServiceDTO{}, err
 	}
-	return &ServiceDTO{
+	versions := make([]VersionDTO, 0, len(it.Versions))
+	for _, v := range it.Versions {
+		versions = append(versions, VersionDTO{
+			ID:          v.ID,
+			Name:        v.Name,
+			PublishedOn: v.PublishedOn.Format("2006-01-02"),
+		})
+	}
+	return ServiceDTO{
 		ServiceUUID: it.ServiceUUID,
 		Name:        it.Name,
 		Description: it.Description,
+		Versions:    versions,
 	}, nil
 }
 

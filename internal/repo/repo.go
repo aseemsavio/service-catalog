@@ -91,7 +91,9 @@ func (r *Repo) ListServices(ctx context.Context, o ListOpts) (items []Service, t
 
 func (r *Repo) GetService(ctx context.Context, id uuid.UUID) (*Service, error) {
 	var s Service
-	if err := r.db.WithContext(ctx).First(&s, "service_uuid = ?", id).Error; err != nil {
+	if err := r.db.WithContext(ctx).
+		Preload("Versions").
+		First(&s, "service_uuid = ?", id).Error; err != nil {
 		return nil, err
 	}
 	return &s, nil
