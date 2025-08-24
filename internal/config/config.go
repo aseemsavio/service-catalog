@@ -5,6 +5,7 @@ import (
 	"os"
 )
 
+// Config holds the application configuration
 type Config struct {
 	Env      string
 	HTTPPort string
@@ -12,6 +13,7 @@ type Config struct {
 	LogLevel string
 }
 
+// PG holds the PostgreSQL configuration
 type PG struct {
 	Host     string
 	Port     string
@@ -21,6 +23,7 @@ type PG struct {
 	SSLMode  string
 }
 
+// Load reads the configuration from environment variables or defaults
 func Load() Config {
 	return Config{
 		Env:      get("APP_ENV", "dev"),
@@ -37,6 +40,7 @@ func Load() Config {
 	}
 }
 
+// PostgresConnectionString constructs the PostgreSQL connection string
 func (c Config) PostgresConnectionString() string {
 	return fmt.Sprintf(
 		"host=%s port=%s user=%s password=%s dbname=%s sslmode=%s",
@@ -44,6 +48,7 @@ func (c Config) PostgresConnectionString() string {
 	)
 }
 
+// / get retrieves the value of the environment variable named by the key or returns the default value
 func get(k, d string) string {
 	if v := os.Getenv(k); v != "" {
 		return v

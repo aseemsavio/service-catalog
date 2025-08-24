@@ -10,6 +10,7 @@ import (
 	"gorm.io/gorm/logger"
 )
 
+// Service represents a service with its versions
 type Service struct {
 	ServiceUUID uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	Name        string    `gorm:"uniqueIndex;not null"`
@@ -19,6 +20,7 @@ type Service struct {
 	Versions    []Version `gorm:"foreignKey:ServiceUUID;constraint:OnDelete:CASCADE"`
 }
 
+// Version represents a version of a service
 type Version struct {
 	ID          uuid.UUID `gorm:"type:uuid;default:uuid_generate_v4();primaryKey"`
 	ServiceUUID uuid.UUID `gorm:"type:uuid;index;not null"`
@@ -26,8 +28,10 @@ type Version struct {
 	PublishedOn time.Time `gorm:"type:date;not null"`
 }
 
+// Repo provides methods to interact with the database
 type Repo struct{ db *gorm.DB }
 
+// Open initializes the database connection and returns a Repo instance
 func Open(dsn string) (*Repo, error) {
 	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{
 		Logger: logger.Default.LogMode(logger.Warn),
@@ -38,6 +42,7 @@ func Open(dsn string) (*Repo, error) {
 	return &Repo{db: db}, nil
 }
 
+// ListOpts defines options for listing services
 type ListOpts struct {
 	Query    string
 	SortBy   string // name|created_at|updated_at|latest_published_on|version_count
@@ -46,6 +51,7 @@ type ListOpts struct {
 	PageSize int
 }
 
+// orderOr ensures the order string is either "asc" or "desc"
 func orderOr(s string) string {
 	if s == "desc" {
 		return "desc"
@@ -53,6 +59,7 @@ func orderOr(s string) string {
 	return "asc"
 }
 
+// ListServices retrieves a paginated list of services with optional filtering and sorting
 func (r *Repo) ListServices(ctx context.Context, o ListOpts) (items []Service, total int64, err error) {
 	if o.Page <= 0 {
 		o.Page = 1
@@ -89,6 +96,7 @@ func (r *Repo) ListServices(ctx context.Context, o ListOpts) (items []Service, t
 	return
 }
 
+// GetService retrieves a service by its UUID, including its versions
 func (r *Repo) GetService(ctx context.Context, id uuid.UUID) (*Service, error) {
 	var s Service
 	if err := r.db.WithContext(ctx).

@@ -9,10 +9,13 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// Handler handles HTTP requests for services
 type Handler struct{ svc *service.Svc }
 
+// NewHandler creates a new Handler with the given service
 func NewHandler(s *service.Svc) *Handler { return &Handler{svc: s} }
 
+// ListServices represents a paginated list response
 func (h *Handler) ListServices(w http.ResponseWriter, r *http.Request) {
 	q := r.URL.Query()
 	opts := service.ListOpts{
@@ -34,6 +37,7 @@ func (h *Handler) ListServices(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, resp)
 }
 
+// GetService retrieves a service by its UUID
 func (h *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 	idStr := chi.URLParam(r, "id")
 	id, err := service.ParseUUID(idStr)
@@ -49,16 +53,19 @@ func (h *Handler) GetService(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, it)
 }
 
+// writeJSON writes the given value as a JSON response with the specified status code
 func writeJSON(w http.ResponseWriter, code int, v any) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	_ = json.NewEncoder(w).Encode(v)
 }
 
+// writeErr writes an error message as a JSON response with the specified status code
 func writeErr(w http.ResponseWriter, code int, msg string) {
 	writeJSON(w, code, map[string]string{"error": msg})
 }
 
+// atoiOr converts a string to an integer, returning a default value if conversion fails or the value is not positive
 func atoiOr(s string, d int) int {
 	if v, err := strconv.Atoi(s); err == nil && v > 0 {
 		return v

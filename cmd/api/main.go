@@ -14,6 +14,7 @@ import (
 	httpx "services-catalog/internal/http"
 )
 
+// / Main function to start the service
 func main() {
 	configuration := config.Load()
 	logg, err := logger.New(configuration.LogLevel)

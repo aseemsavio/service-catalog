@@ -1,5 +1,6 @@
 package http
 
+// ListQuery represents the query parameters for listing resources
 type ListQuery struct {
 	Query    string `form:"query"`
 	SortBy   string `form:"sort"`
@@ -8,6 +9,7 @@ type ListQuery struct {
 	PageSize int    `form:"page_size"`
 }
 
+// ListResponse represents a paginated response for listing resources
 type ListResponse[T any] struct {
 	Data []T `json:"data"`
 	Meta struct {

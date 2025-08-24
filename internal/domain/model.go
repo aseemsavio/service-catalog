@@ -8,6 +8,7 @@ import (
 	"github.com/google/uuid"
 )
 
+// Service / represents a service with its versions
 type Service struct {
 	ServiceUUID uuid.UUID
 	Name        string
@@ -17,6 +18,7 @@ type Service struct {
 	Versions    []Version
 }
 
+// Version represents a version of a service
 type Version struct {
 	ID          uuid.UUID
 	ServiceUUID uuid.UUID
@@ -24,6 +26,7 @@ type Version struct {
 	PublishedOn time.Time
 }
 
+// Validate checks if the Service fields meet the required constraints
 func (s *Service) Validate() error {
 	if strings.TrimSpace(s.Name) == "" {
 		return errors.New("name is required")

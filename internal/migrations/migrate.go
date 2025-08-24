@@ -14,6 +14,7 @@ import (
 	_ "github.com/lib/pq"
 )
 
+// RunMigrations applies database migrations using the provided configuration
 func RunMigrations(cfg config.Config) error {
 	db, err := sql.Open("postgres", cfg.PostgresConnectionString())
 	if err != nil {

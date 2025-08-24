@@ -4,17 +4,20 @@ import (
 	"context"
 	"errors"
 	"services-catalog/internal/repo"
-	"time"
 
 	"github.com/google/uuid"
 )
 
+// Svc provides service layer methods
 type Svc struct{ repo *repo.Repo }
 
+// New creates a new service instance
 func New(repo *repo.Repo) *Svc { return &Svc{repo: repo} }
 
+// ListOpts defines options for listing services
 type ListOpts = repo.ListOpts
 
+// ServiceDTO is the data transfer object for a service
 type ServiceDTO struct {
 	ServiceUUID uuid.UUID    `json:"service_uuid"`
 	Name        string       `json:"name"`
@@ -22,6 +25,7 @@ type ServiceDTO struct {
 	Versions    []VersionDTO `json:"versions"`
 }
 
+// List retrieves a paginated list of services based on the provided options
 func (s *Svc) List(ctx context.Context, o ListOpts) ([]ServiceDTO, int64, error) {
 	items, total, err := s.repo.ListServices(ctx, o)
 	if err != nil {
@@ -47,6 +51,7 @@ func (s *Svc) List(ctx context.Context, o ListOpts) ([]ServiceDTO, int64, error)
 	return out, total, nil
 }
 
+// Get retrieves a service by its UUID
 func (s *Svc) Get(ctx context.Context, id uuid.UUID) (ServiceDTO, error) {
 	it, err := s.repo.GetService(ctx, id)
 	if err != nil {
@@ -68,24 +73,18 @@ func (s *Svc) Get(ctx context.Context, id uuid.UUID) (ServiceDTO, error) {
 	}, nil
 }
 
+// VersionDTO is the data transfer object for a version
 type VersionDTO struct {
 	ID          uuid.UUID `json:"id"`
 	Name        string    `json:"name"`
 	PublishedOn string    `json:"published_on"`
 }
 
+// ParseUUID parses a UUID from string and returns an error if invalid
 func ParseUUID(s string) (uuid.UUID, error) {
 	id, err := uuid.Parse(s)
 	if err != nil {
 		return uuid.Nil, errors.New("invalid uuid")
 	}
 	return id, nil
-}
-
-// Utility mainly for tests
-func Ptr[T any](v T) *T { return &v }
-
-// (Optionally) a small helper to normalize date to midnight for input paths later
-func normalizeDate(t time.Time) time.Time {
-	return time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0, time.UTC)
 }

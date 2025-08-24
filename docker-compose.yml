@@ -12,18 +12,6 @@ services:
     volumes:
       - pgdata:/var/lib/postgresql/data
       - ./migrations:/migrations:ro
-#
-#  api:
-#    build: .
-#    env_file: .env.example
-#    depends_on:
-#      - postgres
-#    ports:
-#      - "8080:8080"
-#    command: [ "/bin/sh", "/app/entrypoint.sh" ]
-#    # command: [ "/bin/sh", "-c", "/app/scripts/wait-for.sh postgres:5432 -- ./service-catalog" ]
-##    volumes:
-##      - ./:/app:cached
 
 volumes:
   pgdata:

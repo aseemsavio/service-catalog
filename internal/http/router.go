@@ -6,6 +6,7 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
+// NewRouter sets up the HTTP router with routes and middleware
 func NewRouter(h *Handler) http.Handler {
 	r := chi.NewRouter()
 	for _, mw := range Common() {
